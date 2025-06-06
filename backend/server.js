@@ -20,13 +20,34 @@ connectCloudinary()
 
 // middlewares
 app.use(express.json())
-app.use(cors({
-  origin: [
-    'https://agrinext-frontend-abhay-hastars-projects.vercel.app',
-    'https://agrinext-admin.vercel.app'  // if you have an admin panel deployed
-  ],
-  credentials: true  // if you're using cookies, sessions, or auth
-}));
+import cors from 'cors';
+
+const allowedOrigins = [
+  'https://agrinext-frontend-abhay-hastars-projects.vercel.app',
+  'https://agrinext-admin.vercel.app',
+];
+
+// CORS options object
+const corsOptions = {
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true, // if you use cookies or auth headers
+  optionsSuccessStatus: 200 // some legacy browsers choke on 204
+};
+
+// Apply CORS middleware to all requests
+app.use(cors(corsOptions));
+
+// To explicitly handle preflight requests
+app.options('*', cors(corsOptions));
+
 
 
 // api endpoints
