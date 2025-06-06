@@ -20,7 +20,13 @@ connectCloudinary()
 
 // middlewares
 app.use(express.json())
-app.use(cors({ origin: "*" }));
+app.use(cors({
+  origin: [
+    'https://agrinext-frontend-abhay-hastars-projects.vercel.app',
+    'https://agrinext-admin.vercel.app'  // if you have an admin panel deployed
+  ],
+  credentials: true  // if you're using cookies, sessions, or auth
+}));
 
 
 // api endpoints
