@@ -8,7 +8,7 @@ import axios from 'axios';
 
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency, addToCart } = useContext(ShopContext);
+  const { products, currency, addToCart, buyNow } = useContext(ShopContext);
   const navigate = useNavigate();
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState("");
@@ -74,6 +74,7 @@ const Product = () => {
   // Handle Buy Now (without adding to cart)
   const handleBuyNow = async () => {
     if (productData.stock > 0) {
+      buyNow(productData.id);
       await updateStock(productData._id, 1); // Deduct stock in DB
       navigate("/place-order"); // Navigate to checkout
     }
@@ -135,7 +136,7 @@ const Product = () => {
                 {t("add_to_cart")}
               </button>
               <button
-                onClick={handleBuyNow}
+                onClick={()=>buyNow(productData._id)}
                 className="bg-green-500 text-white px-8 py-3 text-sm active:bg-gray-700 hover:scale-105 shadow-lg rounded mx-2"
               >
                 {t("proceed_to_checkout")}

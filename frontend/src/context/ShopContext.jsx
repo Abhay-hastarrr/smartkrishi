@@ -54,9 +54,8 @@ const ShopContextProvider = (props) => {
 
     
 
-    const buyNow = async (itemId, size) => {
+   const buyNow = async (itemId, size) => {
 
-       
         let cartData = structuredClone(cartItems);
 
         if (cartData[itemId]) {
@@ -77,15 +76,16 @@ const ShopContextProvider = (props) => {
             try {
 
                 await axios.post(backendUrl + '/api/cart/add', { itemId, size }, { headers: { token } })
-                
+               
 
             } catch (error) {
                 console.log(error)
                 toast.error(error.message)
             }
         }
-
+        navigate("/place-order");
     }
+
 
     const getCartCount = () => {
         let totalCount = 0;

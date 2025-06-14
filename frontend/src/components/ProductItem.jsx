@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { assets } from "../assets/assets"; // Import assets
 
 const ProductItem = ({ id, image, name, price }) => {
-  const { currency, products, addToCart } = useContext(ShopContext); // Removed buyNow
+  const { currency, products, addToCart, buyNow } = useContext(ShopContext); // Removed buyNow
   const { t } = useTranslation();
   const navigate = useNavigate(); // Hook for navigation
   const [hovered, setHovered] = useState(false);
@@ -22,7 +22,7 @@ const ProductItem = ({ id, image, name, price }) => {
   // Handle Buy Now (without adding to cart)
   const handleBuyNow = () => {
     if (productData?.stock > 0) {
-      navigate("/place-order"); // Navigate to checkout without adding to cart
+      buyNow(productData._id)    
     }
   };
 
@@ -67,7 +67,7 @@ const ProductItem = ({ id, image, name, price }) => {
 
               {/* Buy Now Button */}
               <button
-                onClick={handleBuyNow} // Corrected Buy Now function
+               onClick={handleBuyNow} // Corrected Buy Now function
                 className="bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium transition duration-300 hover:bg-gray-600"
               >
                 {t("proceed_to_checkout")}
