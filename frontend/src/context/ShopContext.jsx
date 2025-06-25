@@ -52,8 +52,6 @@ const ShopContextProvider = (props) => {
 
     }
 
-    
-
    const buyNow = async (itemId, size) => {
 
         let cartData = structuredClone(cartItems);

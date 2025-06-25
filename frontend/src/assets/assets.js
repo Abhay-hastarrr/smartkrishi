@@ -45,6 +45,7 @@ import razorpay_logo from './razorpay_logo.png'
 import stripe_logo from './stripe_logo.png'
 import cross_icon from './cross_icon.png'
 import v_v1 from "./videos.mp4"
+import banner from "./banner.png"
 
 export const assets = {
     logo,
@@ -65,7 +66,8 @@ export const assets = {
     razorpay_logo,
     stripe_logo,
     cross_icon,
-    v_v1
+    v_v1,
+    banner
 
 }
 

@@ -98,7 +98,7 @@ const Collection = () => {
             <details key={idx} className='group'>
               <summary className='flex items-center justify-between cursor-pointer'>
                 <span>{t(cat.name)}</span>
-                <img src={assets.dropdown_icon} alt='' className='h-3 transform group-open:rotate-90' />
+                <img src={assets.dropdown_icon} alt='' className='h-3 transform group-open:rotate-90 px-8' />
               </summary>
               <div className='pl-4 mt-2'>
                 {cat.subcategories.map((sub, index) => (
@@ -115,8 +115,8 @@ const Collection = () => {
           <p className='text-lg'>{t('sort_by')}:</p>
           <select className='border p-2 w-full mt-2' onChange={(e) => setSortBy(e.target.value)}>
             <option value=''>{t('select')}</option>
-            <option value='price_low_high'>{t('price_low_high')}</option>
-            <option value='price_high_low'>{t('price_high_low')}</option>
+            <option value='price_low_high'>{t('price low to high')}</option>
+            <option value='price_high_low'>{t('price high to low')}</option>
           </select>
           <div className='mt-4'>
             <label className='flex gap-2'>
