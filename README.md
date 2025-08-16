@@ -8,11 +8,10 @@
 <p align="center">
   <b>Empowering Agriculture Through Seamless Innovation and Growth</b>
 </p>
-<p aling = "center">
-  <a href="https://agrinext-frontend.vercel.app/">Live Preview</a>
-</p>
+
 
 <p align="center">
+  <a href="https://agrinext-frontend.vercel.app/">Live Preview</a>
   <a href="#features">Features</a> •
   <a href="#tech-stack">Tech Stack</a> •
   <a href="#getting-started">Getting Started</a> •
