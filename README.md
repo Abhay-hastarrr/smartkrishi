@@ -11,7 +11,7 @@
 
 
 <p align="center">
-  <a href="https://agrinext-frontend.vercel.app/">Live Preview</a>
+  <a href="https://agrinext-frontend.vercel.app/">Live Preview</a> •
   <a href="#features">Features</a> •
   <a href="#tech-stack">Tech Stack</a> •
   <a href="#getting-started">Getting Started</a> •
