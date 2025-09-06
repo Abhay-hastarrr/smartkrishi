@@ -14,6 +14,8 @@ import PlaceOrder from "./pages/PlaceOrder";
 import Orders from "./pages/Orders";
 import Verify from "./pages/Verify";
 import Information from "./pages/Information";
+import ChatBot from "./components/ChatBot";
+import VoiceAssistant from './components/VoiceAssistant'
 
 
 import { ToastContainer } from "react-toastify";
@@ -49,6 +51,9 @@ const App = () => {
 
       </Routes>
       <Footer />
+
+      <ChatBot />
+      <VoiceAssistant />
     </div>
   );
 };

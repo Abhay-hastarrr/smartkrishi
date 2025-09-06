@@ -8,7 +8,6 @@ import { useRef } from 'react'
 import Seed from '../components/Seed'
 import PlantProtection from '../components/PlantProtection'
 import AnimalHusbandry from '../components/AnimalHusbandry'
-import VoiceAssistant from '../components/VoiceAssistant'
 import Plant from '../components/plant'
 import Seedling from '../components/Seedling'
 
@@ -22,7 +21,7 @@ const Home = () => {
   return (
     <div>
       <Hero />
-      <VoiceAssistant />
+      
       <LatestCollection />
       <BestSeller />
       <Plant />
