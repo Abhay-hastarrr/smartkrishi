@@ -72,6 +72,16 @@ const VoiceAssistant = () => {
       return;
     }
 
+    // Load voices when component mounts or language changes
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      console.log("Available voices:", voices.map(v => `${v.name} (${v.lang})`));
+    };
+
+    // Load voices initially and on voiceschanged event
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const speechRecognition = new SpeechRecognition();
     
@@ -118,6 +128,7 @@ const VoiceAssistant = () => {
       if (speechRecognition) {
         speechRecognition.stop();
       }
+      window.speechSynthesis.onvoiceschanged = null;
     };
   }, [language]);
 
@@ -301,61 +312,75 @@ const VoiceAssistant = () => {
       {/* Expanded Panel */}
       {isExpanded && (
         <div 
-          className="absolute bottom-16 left-0 bg-white rounded-2xl shadow-2xl p-4 w-80 transform transition-all duration-300 border border-gray-100"
+          className="absolute bottom-20 left-0 bg-white rounded-2xl shadow-2xl p-6 w-96 transform transition-all duration-300 border-2 border-green-100 backdrop-blur-sm"
           onMouseEnter={() => setIsExpanded(true)}
           onMouseLeave={() => setIsExpanded(false)}
+          style={{
+            background: 'linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%)',
+            boxShadow: '0 25px 50px -12px rgba(34, 197, 94, 0.25), 0 0 0 1px rgba(34, 197, 94, 0.05)'
+          }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-              <Mic size={18} className="text-blue-500" />
-              {language === "hi-IN" ? "आवाज़ सहायक" : "Voice Assistant"}
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-gray-800 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg">
+                <Mic size={20} className="text-white" />
+              </div>
+              <span className="text-lg">
+                {language === "hi-IN" ? "आवाज़ सहायक" : "Voice Assistant"}
+              </span>
             </h3>
             
             {/* Language Selector */}
-            <div className="flex items-center gap-2">
-              <Languages size={16} className="text-gray-500" />
+            <div className="flex items-center gap-3 bg-green-50 rounded-xl p-2 border border-green-200">
+              <Languages size={18} className="text-green-600" />
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-gray-50 text-sm px-2 py-1 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="bg-transparent text-sm font-medium text-green-700 focus:outline-none cursor-pointer"
               >
-                <option value="en-US">English</option>
-                <option value="hi-IN">हिन्दी</option>
+                <option value="en-US">🇺🇸 English</option>
+                <option value="hi-IN">🇮🇳 हिन्दी</option>
               </select>
             </div>
           </div>
 
           {/* Quick Actions */}
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">
-              {language === "hi-IN" ? "त्वरित कार्य:" : "Quick Actions:"}
+          <div className="mb-6">
+            <p className="text-sm font-semibold text-green-700 mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              {language === "hi-IN" ? "त्वरित कार्य" : "Quick Actions"}
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               {quickActions.map((action, index) => (
                 <button
                   key={index}
                   onClick={() => handleQuickAction(action.route, action.label)}
-                  className="flex items-center gap-2 p-2 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors text-sm hover:text-blue-600"
+                  className="flex items-center gap-3 p-3 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 rounded-xl transition-all duration-200 text-sm font-medium hover:shadow-md border border-green-100 hover:border-green-200 group"
                 >
-                  <action.icon size={16} />
-                  {action.label}
+                  <div className="p-1.5 bg-white rounded-lg shadow-sm group-hover:shadow-md transition-shadow">
+                    <action.icon size={16} className="text-green-600" />
+                  </div>
+                  <span className="text-green-800">{action.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Status */}
-          <div className="mb-3">
-            <div className={`text-sm px-3 py-2 rounded-lg ${
+          <div className="mb-4">
+            <div className={`text-sm px-4 py-3 rounded-xl border-2 font-medium transition-all duration-300 ${
               isListening 
-                ? "bg-red-50 text-red-700 border border-red-200" 
-                : "bg-blue-50 text-blue-700 border border-blue-200"
+                ? "bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border-red-200 shadow-sm" 
+                : "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-green-200 shadow-sm"
             }`}>
-              {isListening 
-                ? (language === "hi-IN" ? "🎤 सुन रहा हूँ..." : "🎤 Listening...")
-                : (language === "hi-IN" ? "माइक्रोफ़ोन बटन दबाएं" : "Click microphone to start")
-              }
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}></div>
+                {isListening 
+                  ? (language === "hi-IN" ? "🎤 सुन रहा हूँ..." : "🎤 Listening...")
+                  : (language === "hi-IN" ? "माइक्रोफ़ोन बटन दबाएं" : "Click microphone to start")
+                }
+              </div>
             </div>
           </div>
 
@@ -363,26 +388,34 @@ const VoiceAssistant = () => {
           {response && (
             <div 
               ref={responseRef}
-              className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3 text-sm text-gray-800 max-h-20 overflow-y-auto"
+              className="bg-gradient-to-br from-green-50 via-emerald-50 to-green-50 border-2 border-green-200 rounded-xl p-4 text-sm text-gray-800 max-h-24 overflow-y-auto mb-4 shadow-inner"
             >
-              <div className="flex items-start gap-2">
-                <Volume2 size={14} className="text-green-600 mt-0.5 flex-shrink-0" />
-                <p className="leading-relaxed">{response}</p>
+              <div className="flex items-start gap-3">
+                <div className="p-1.5 bg-green-500 rounded-lg shadow-sm mt-0.5 flex-shrink-0">
+                  <Volume2 size={14} className="text-white" />
+                </div>
+                <p className="leading-relaxed font-medium text-green-900">{response}</p>
               </div>
             </div>
           )}
 
           {/* Help Text */}
-          <div className="mt-3 text-xs text-gray-500 border-t border-gray-100 pt-2">
+          <div className="text-xs text-green-600 bg-green-50 rounded-xl p-3 border border-green-100">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+              <span className="font-semibold text-green-700">
+                {language === "hi-IN" ? "उदाहरण कमांड:" : "Example Commands:"}
+              </span>
+            </div>
             {language === "hi-IN" ? (
-              <div>
-                <p className="mb-1">कहिए: "होम पर जाएं", "कार्ट खोलें"</p>
-                <p>"मेरे ऑर्डर", "नमस्ते", "सहायता"</p>
+              <div className="space-y-1 text-green-600">
+                <p>• "होम पर जाएं", "कार्ट खोलें"</p>
+                <p>• "मेरे ऑर्डर", "नमस्ते", "सहायता"</p>
               </div>
             ) : (
-              <div>
-                <p className="mb-1">Try: "Go to home", "Open cart"</p>
-                <p>"Check my orders", "Hello", "Help"</p>
+              <div className="space-y-1 text-green-600">
+                <p>• "Go to home", "Open cart"</p>
+                <p>• "Check my orders", "Hello", "Help"</p>
               </div>
             )}
           </div>
