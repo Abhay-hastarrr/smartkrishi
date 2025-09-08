@@ -11,7 +11,7 @@ const ChatBot = () => {
   // Chat flow configuration
   const chatFlow = {
     welcome: {
-      message: "👋 Hello! I'm your AgriNext Assistant. How can I help you today?",
+      message: "Hello! I'm your AgriNext Assistant. How can I help you today?",
       options: [
         { text: "👤 Account", nextStep: "account" },
         { text: "📦 Product", nextStep: "product" },
