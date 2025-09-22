@@ -60,10 +60,10 @@ const LanguageSwitcher = () => {
         {/* Mobile Toggle Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="flex items-center justify-center w-12 h-12 bg-white border-2 border-gray-300 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+          className="flex items-center justify-center w-9 h-9 bg-white border-2 border-gray-300 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
           aria-label="Select Language"
         >
-          <span className="text-2xl">{getCurrentLanguage()?.flag || "🌐"}</span>
+          <span className="text-xl">{getCurrentLanguage()?.flag || "🌐"}</span>
         </button>
 
         {/* Mobile Dropdown Menu */}

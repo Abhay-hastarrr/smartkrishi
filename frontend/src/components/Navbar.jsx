@@ -1,4 +1,4 @@
-import React, { useRef,useContext, useState } from "react";
+import React, { useRef, useContext, useState } from "react";
 import { assets } from "../assets/assets";
 import { Link, NavLink } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
@@ -40,7 +40,7 @@ const Navbar = () => {
         </NavLink>
 
       </ul>
-      
+
 
       {/* Icons and Buttons */}
       <div className="flex items-center gap-6">
@@ -56,11 +56,18 @@ const Navbar = () => {
 
         {/* Profile Dropdown */}
         <div className="group relative">
-          <img className="w-5 cursor-pointer hover:scale-105" src={assets.profile_icon} alt="" />
+          <img
+            className="w-6 h-6 min-w-6 min-h-6 cursor-pointer hover:scale-105 object-contain"
+            src={assets.profile_icon}
+            alt="profile"
+          />
           {token && (
             <div className="group-hover:block hidden absolute right-0 pt-4 z-50">
               <div className="flex flex-col gap-2 w-36 py-3 px-5 bg-slate-100 text-gray-500 rounded shadow-lg">
-                <p onClick={() => navigate("/orders")} className="cursor-pointer hover:text-black">
+                <p
+                  onClick={() => navigate("/orders")}
+                  className="cursor-pointer hover:text-black"
+                >
                   {t("orders")}
                 </p>
                 <p onClick={logout} className="cursor-pointer hover:text-black">
@@ -90,45 +97,45 @@ const Navbar = () => {
         )}
 
         <LanguageSwitcher />
-      
-
-      {/* Mobile Menu Icon */}
-      <img
-        onClick={() => setVisible(true)}
-        src={assets.menu_icon}
-        className="w-5 cursor-pointer sm:hidden hover:scale-105"
-        alt=""
-      />
-    </div>
 
 
-{/* Mobile Sidebar Menu */ }
-<div
-  className={`fixed top-0 right-0 bottom-0 overflow-hidden bg-white transition-all z-50 ${visible ? "w-full" : "w-0"
-    }`}
->
-  <div className="flex flex-col text-gray-600">
-    {/* Back Button */}
-    <div onClick={() => setVisible(false)} className="flex items-center gap-4 p-3 cursor-pointer">
-      <img className="h-4 rotate-180" src={assets.dropdown_icon} alt="" />
-      <p>{t("back")}</p>
-    </div>
+        {/* Mobile Menu Icon */}
+        <img
+          onClick={() => setVisible(true)}
+          src={assets.menu_icon}
+          className="w-5 cursor-pointer sm:hidden hover:scale-105"
+          alt=""
+        />
+      </div>
 
-    {/* Mobile Menu Links with Translations */}
-    <NavLink onClick={() => setVisible(false)} className="py-2 pl-6 border" to="/">
-      {t("home")}
-    </NavLink>
-    <NavLink onClick={() => setVisible(false)} className="py-2 pl-6 border" to="/collection">
-      {t("collection")}
-    </NavLink>
-    <NavLink onClick={() => setVisible(false)} className="py-2 pl-6 border" to="/about">
-      {t("about")}
-    </NavLink>
-    <NavLink onClick={() => setVisible(false)} className="py-2 pl-6 border" to="/contact">
-      {t("contact")}
-    </NavLink>
-  </div>
-</div>
+
+      {/* Mobile Sidebar Menu */}
+      <div
+        className={`fixed top-0 right-0 bottom-0 overflow-hidden bg-white transition-all z-50 ${visible ? "w-full" : "w-0"
+          }`}
+      >
+        <div className="flex flex-col text-gray-600">
+          {/* Back Button */}
+          <div onClick={() => setVisible(false)} className="flex items-center gap-4 p-3 cursor-pointer">
+            <img className="h-4 rotate-180" src={assets.dropdown_icon} alt="" />
+            <p>{t("back")}</p>
+          </div>
+
+          {/* Mobile Menu Links with Translations */}
+          <NavLink onClick={() => setVisible(false)} className="py-2 pl-6 border" to="/">
+            {t("home")}
+          </NavLink>
+          <NavLink onClick={() => setVisible(false)} className="py-2 pl-6 border" to="/collection">
+            {t("collection")}
+          </NavLink>
+          <NavLink onClick={() => setVisible(false)} className="py-2 pl-6 border" to="/about">
+            {t("about")}
+          </NavLink>
+          <NavLink onClick={() => setVisible(false)} className="py-2 pl-6 border" to="/contact">
+            {t("contact")}
+          </NavLink>
+        </div>
+      </div>
     </div >
   );
 };
