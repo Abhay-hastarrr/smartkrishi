@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, ChevronLeft, Bot, User } from 'lucide-react';
+import { MessageCircle, X, ChevronLeft, Bot, User, Move, Maximize2 } from 'lucide-react';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -7,6 +7,18 @@ const ChatBot = () => {
   const [chatHistory, setChatHistory] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Dragging state
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: window.innerWidth - 420, y: window.innerHeight - 420 });
+
+  // Resizing state
+  const [isResizing, setIsResizing] = useState(false);
+  const [size, setSize] = useState({ width: 384, height: 384 }); // 24rem = 384px
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+
+  const chatRef = useRef(null);
 
   // Chat flow configuration
   const chatFlow = {
@@ -203,6 +215,67 @@ const ChatBot = () => {
     }
   }, [isOpen]);
 
+  // Dragging functionality
+  const handleMouseDown = (e) => {
+    if (e.target.closest('.resize-handle') || e.target.closest('button')) return;
+    
+    setIsDragging(true);
+    const rect = chatRef.current.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging) {
+      const newX = Math.max(0, Math.min(window.innerWidth - size.width, e.clientX - dragOffset.x));
+      const newY = Math.max(0, Math.min(window.innerHeight - size.height, e.clientY - dragOffset.y));
+      setPosition({ x: newX, y: newY });
+    }
+
+    if (isResizing) {
+      const deltaX = e.clientX - resizeStart.x;
+      const deltaY = e.clientY - resizeStart.y;
+      
+      const newWidth = Math.max(300, Math.min(800, resizeStart.width + deltaX));
+      const newHeight = Math.max(200, Math.min(600, resizeStart.height + deltaY));
+      
+      setSize({ width: newWidth, height: newHeight });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setIsResizing(false);
+  };
+
+  // Resizing functionality
+  const handleResizeStart = (e) => {
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeStart({
+      x: e.clientX,
+      y: e.clientY,
+      width: size.width,
+      height: size.height
+    });
+  };
+
+  useEffect(() => {
+    if (isDragging || isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = 'none';
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.userSelect = 'auto';
+      };
+    }
+  }, [isDragging, isResizing, dragOffset, resizeStart]);
+
   const addBotMessage = (message, step) => {
     setIsTyping(true);
     setTimeout(() => {
@@ -247,12 +320,12 @@ const ChatBot = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed top-0 left-0 z-50 pointer-events-none">
       {/* Chat Toggle Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 animate-pulse"
+          className="fixed bottom-4 right-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 animate-pulse pointer-events-auto"
         >
           <MessageCircle size={24} />
         </button>
@@ -260,9 +333,23 @@ const ChatBot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl w-96 h-96 flex flex-col border border-gray-200 overflow-hidden">
+        <div
+          ref={chatRef}
+          className="bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200 overflow-hidden pointer-events-auto select-none"
+          style={{
+            position: 'absolute',
+            left: position.x,
+            top: position.y,
+            width: size.width,
+            height: size.height,
+            cursor: isDragging ? 'grabbing' : 'grab'
+          }}
+        >
           {/* Header */}
-          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 flex items-center justify-between">
+          <div 
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 flex items-center justify-between cursor-grab active:cursor-grabbing"
+            onMouseDown={handleMouseDown}
+          >
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                 <Bot size={18} />
@@ -273,16 +360,19 @@ const ChatBot = () => {
               </div>
             </div>
             <div className="flex items-center space-x-2">
+              <div className="p-1 text-green-100">
+                <Move size={14} />
+              </div>
               <button
                 onClick={resetChat}
-                className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
                 title="Reset Chat"
               >
                 <ChevronLeft size={18} />
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
