@@ -3,12 +3,12 @@ import { assets } from "../assets/assets";
 import { Link, NavLink } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "./LanguageSwitcher"; // ✅ Import Language Switcher
+import LanguageSwitcher from "./LanguageSwitcher"; //Import Language Switcher
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const { setShowSearch, getCartCount, navigate, token, setToken, setCartItems } = useContext(ShopContext);
-  const { t } = useTranslation(); // ✅ Import translation function
+  const { t } = useTranslation(); //Import translation function
 
   const logout = () => {
     navigate("/login");
@@ -19,12 +19,12 @@ const Navbar = () => {
 
   return (
     <div className="flex items-center justify-between py-5 font-medium">
-      {/* ✅ Logo */}
+      {/*Logo */}
       <Link to="/">
         <img src={assets.logo} className="w-36" alt="" />
       </Link>
 
-      {/* ✅ Desktop Menu with Translations */}
+      {/* Desktop Menu with Translations */}
       <ul className="hidden sm:flex gap-5 text-sm text-gray-700">
         <NavLink to="/" className="flex flex-col items-center gap-1 hover:scale-105">
           <p>{t("home")}</p>
@@ -42,7 +42,7 @@ const Navbar = () => {
       </ul>
       
 
-      {/* ✅ Icons and Buttons */}
+      {/* Icons and Buttons */}
       <div className="flex items-center gap-6">
         <img
           onClick={() => {
@@ -54,7 +54,7 @@ const Navbar = () => {
           alt=""
         />
 
-        {/* ✅ Profile Dropdown */}
+        {/* Profile Dropdown */}
         <div className="group relative">
           <img className="w-5 cursor-pointer hover:scale-105" src={assets.profile_icon} alt="" />
           {token && (
@@ -71,7 +71,7 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* ✅ Cart Icon */}
+        {/* Cart Icon */}
         <Link to="/cart" className="relative">
           <img src={assets.cart_icon} className="w-5 min-w-5 hover:scale-105" alt="" />
           <p className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
@@ -79,7 +79,7 @@ const Navbar = () => {
           </p>
         </Link>
 
-        {/* ✅ Login Button */}
+        {/* Login Button */}
         {!token && (
           <button
             onClick={() => navigate("/login")}
@@ -92,7 +92,7 @@ const Navbar = () => {
         <LanguageSwitcher />
       
 
-      {/* ✅ Mobile Menu Icon */}
+      {/* Mobile Menu Icon */}
       <img
         onClick={() => setVisible(true)}
         src={assets.menu_icon}
@@ -102,7 +102,7 @@ const Navbar = () => {
     </div>
 
 
-{/* ✅ Mobile Sidebar Menu */ }
+{/* Mobile Sidebar Menu */ }
 <div
   className={`fixed top-0 right-0 bottom-0 overflow-hidden bg-white transition-all z-50 ${visible ? "w-full" : "w-0"
     }`}
