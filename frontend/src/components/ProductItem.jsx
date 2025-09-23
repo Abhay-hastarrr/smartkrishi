@@ -86,7 +86,7 @@ const ProductItem = ({ id, image, name, price }) => {
   const handleBuyNow = () => {
     if (productData?.stock > 0) {
       buyNow(productData._id);
-      navigate("/place-order"); //  Don’t forget to navigate after buyNow
+      navigate("/place-order"); // 👈 Don’t forget to navigate after buyNow
     }
   };
 
