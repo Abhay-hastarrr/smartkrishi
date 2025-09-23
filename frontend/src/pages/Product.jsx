@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext"; 
 import { assets } from "../assets/assets"; 
@@ -10,77 +10,79 @@ const Product = () => {
   const { productId } = useParams();
   const { products, currency, addToCart, buyNow } = useContext(ShopContext);
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState("");
   const [weight, setWeight] = useState("");
-  const { t, i18n } = useTranslation();
-  
-  // State for translated content
+  const [isTranslating, setIsTranslating] = useState(false);
   const [translatedName, setTranslatedName] = useState("");
   const [translatedDescription, setTranslatedDescription] = useState("");
-  const [isTranslating, setIsTranslating] = useState(false);
 
-  // MyMemory Translation function
+  // Ref to cache translations: { language: { name, description } }
+  const translationCache = useRef({});
+
+  // MyMemory Translation function (safe)
   const translateText = async (text, targetLang) => {
-    // If target language is English, return original text
-    if (targetLang === 'en') {
-      return text;
-    }
+    if (targetLang === 'en') return text;
 
-    // Language code mapping for MyMemory API
     const langCodeMap = {
-      'hi': 'hi-IN',  // Hindi
-      'bn': 'bn-IN',  // Bengali
-      'ta': 'ta-IN',  // Tamil
-      'te': 'te-IN',  // Telugu
-      'mr': 'mr-IN',  // Marathi
-      'gu': 'gu-IN',  // Gujarati
-      'pa': 'pa-IN',  // Punjabi
-      'awa': 'hi-IN', // Awadhi (using Hindi as fallback)
-      'bho': 'hi-IN'  // Bhojpuri (using Hindi as fallback)
+      hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', te: 'te-IN',
+      mr: 'mr-IN', gu: 'gu-IN', pa: 'pa-IN', awa: 'hi-IN', bho: 'hi-IN'
     };
-
     const targetLangCode = langCodeMap[targetLang] || targetLang;
 
     try {
       const response = await fetch(
-        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en-GB|${targetLangCode}`
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLangCode}`
       );
-      
-      const data = await response.json();
-      
-      if (data.responseStatus === 200 && data.responseData.translatedText) {
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.warn("Translation returned non-JSON, fallback to original:", err);
+        return text;
+      }
+
+      if (data.responseStatus === 200 && data.responseData?.translatedText) {
         return data.responseData.translatedText;
       } else {
-        console.error('Translation failed:', data);
-        return text; // Return original text if translation fails
+        console.warn("Translation failed, fallback to original:", data);
+        return text;
       }
-    } catch (error) {
-      console.error('Translation error:', error);
-      return text; // Return original text on error
+    } catch (err) {
+      console.warn("Translation request failed:", err);
+      return text;
     }
   };
 
-  // Function to translate product content
+  // Translate product content with caching
   const translateProductContent = async (product, language) => {
     if (!product) return;
-    
+    if (translationCache.current[language]) {
+      // Use cached translation
+      setTranslatedName(translationCache.current[language].name);
+      setTranslatedDescription(translationCache.current[language].description);
+      return;
+    }
+
     setIsTranslating(true);
-    
+
     try {
-      // Translate name and description in parallel
-      const [translatedNameResult, translatedDescResult] = await Promise.all([
+      const [nameTranslated, descTranslated] = await Promise.all([
         translateText(product.name, language),
         translateText(product.description, language)
       ]);
-      
-      setTranslatedName(translatedNameResult);
-      setTranslatedDescription(translatedDescResult);
-    } catch (error) {
-      console.error('Error translating product content:', error);
-      // Fallback to original text
-      setTranslatedName(product.name);
-      setTranslatedDescription(product.description);
+
+      setTranslatedName(nameTranslated);
+      setTranslatedDescription(descTranslated);
+
+      // Cache it
+      translationCache.current[language] = {
+        name: nameTranslated,
+        description: descTranslated
+      };
     } finally {
       setIsTranslating(false);
     }
@@ -93,71 +95,48 @@ const Product = () => {
       setProductData(foundProduct);
       setImage(foundProduct.image[0]);
       setWeight(foundProduct.weight || "N/A");
-      
-      // Set initial translated content
+
+      // Default translation = original English
       setTranslatedName(foundProduct.name);
       setTranslatedDescription(foundProduct.description);
-      
-      // Translate if not in English
+
       if (i18n.language !== 'en') {
         translateProductContent(foundProduct, i18n.language);
       }
     }
   }, [productId, products]);
 
-  // Watch for language changes
+  // Watch language changes
   useEffect(() => {
     if (productData) {
       if (i18n.language === 'en') {
-        // Reset to original English content
         setTranslatedName(productData.name);
         setTranslatedDescription(productData.description);
       } else {
-        // Translate to selected language
         translateProductContent(productData, i18n.language);
       }
     }
   }, [i18n.language, productData]);
 
-  // Function to update stock in the database
+  // Update stock safely
   const updateStock = async (productId, quantitySold) => {
     try {
-      // Fetch the latest stock before updating
       const { data } = await axios.post('/api/single', { productId });
-
-      if (!data.success) {
-        console.error("Failed to fetch latest stock:", data.message);
-        return;
-      }
+      if (!data.success) return;
 
       const latestStock = data.product.stock;
       const newStock = latestStock - quantitySold;
+      if (newStock < 0) return;
 
-      if (newStock < 0) {
-        console.error("Insufficient stock.");
-        return;
-      }
-
-      // Send updated stock to the backend
-      const response = await axios.post('/api/update-stock', {
-        id: productId, 
-        stock: newStock, 
-      });
-
+      const response = await axios.post('/api/update-stock', { id: productId, stock: newStock });
       if (response.status === 200) {
-        setProductData((prevData) => ({
-          ...prevData,
-          stock: newStock, // Update stock in UI
-        }));
-      } else {
-        console.error(response.data.message);
+        setProductData(prev => ({ ...prev, stock: newStock }));
       }
-    } catch (error) {
-      console.error("Error updating stock:", error);
+    } catch (err) {
+      console.warn("Stock update failed:", err);
     }
   };
 
-  // Handle Add to Cart
   const handleAddToCart = async () => {
     if (productData.stock > 0) {
       addToCart(productData._id);
@@ -165,7 +144,6 @@ const Product = () => {
     }
   };
 
-  // Handle Buy Now
   const handleBuyNow = async () => {
     if (productData.stock > 0) {
       buyNow(productData._id);
@@ -174,18 +152,21 @@ const Product = () => {
     }
   };
 
-  return productData ? (
+  if (!productData) {
+    return <div className="p-10 text-center text-gray-500">Loading product...</div>;
+  }
+
+  return (
     <div className="border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100">
-      {/* Product Image & Info */}
       <div className="flex gap-12 sm:gap-12 flex-col sm:flex-row">
+        {/* Images */}
         <div className="flex-1 flex flex-col-reverse gap-3 sm:flex-row">
-          {/* Product Images */}
           <div className="flex sm:flex-col overflow-x-auto sm:overflow-y-scroll justify-between sm:justify-normal sm:w-[18.7%] w-full">
-            {productData.image.map((item, index) => (
+            {productData.image.map((item, idx) => (
               <img
+                key={idx}
                 onClick={() => setImage(item)}
                 src={item}
-                key={index}
                 className="w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer"
                 alt={productData.name}
               />
@@ -196,51 +177,33 @@ const Product = () => {
           </div>
         </div>
 
-        {/* Product Details */}
+        {/* Details */}
         <div className="flex-1">
           <h1 className="font-medium text-2xl mt-2">
             {isTranslating ? (
               <span className="animate-pulse bg-gray-200 rounded inline-block w-48 h-8"></span>
-            ) : (
-              translatedName
-            )}
+            ) : translatedName}
           </h1>
           <div className="flex items-center gap-1 mt-2">
-            {/* Rating */}
-            <img src={assets.star_icon} alt="" className="w-3.5" />
-            <img src={assets.star_icon} alt="" className="w-3.5" />
-            <img src={assets.star_icon} alt="" className="w-3.5" />
-            <img src={assets.star_icon} alt="" className="w-3.5" />
+            {[...Array(4)].map((_, i) => <img key={i} src={assets.star_icon} className="w-3.5" alt="" />)}
             <img src={assets.star_dull_icon} alt="" className="w-3.5" />
             <p className="pl-2">(122)</p>
           </div>
-          <p className="mt-5 text-3xl font-medium">
-            {currency}
-            {productData.price}
-          </p>
 
+          <p className="mt-5 text-3xl font-medium">{currency}{productData.price}</p>
           <p className="mt-5 text-gray-500 md:w-4/5">
             {isTranslating ? (
               <span className="animate-pulse bg-gray-200 rounded inline-block w-full h-20"></span>
-            ) : (
-              translatedDescription
-            )}
+            ) : translatedDescription}
           </p>
           <h1 className="mt-5 text-gray-500 md:w-4/5">{weight}</h1>
 
-          {/* Stock Check & Buttons */}
           {productData.stock > 0 ? (
             <>
-              <button
-                onClick={handleAddToCart}
-                className="bg-green-500 text-white px-8 py-3 text-sm active:bg-gray-700 hover:scale-105 shadow-lg rounded"
-              >
+              <button onClick={handleAddToCart} className="bg-green-500 text-white px-8 py-3 text-sm active:bg-gray-700 hover:scale-105 shadow-lg rounded">
                 {t("add_to_cart")}
               </button>
-              <button
-                onClick={handleBuyNow}
-                className="bg-green-500 text-white px-8 py-3 text-sm active:bg-gray-700 hover:scale-105 shadow-lg rounded mx-2"
-              >
+              <button onClick={handleBuyNow} className="bg-green-500 text-white px-8 py-3 text-sm active:bg-gray-700 hover:scale-105 shadow-lg rounded mx-2">
                 {t("proceed_to_checkout")}
               </button>
             </>
@@ -257,11 +220,8 @@ const Product = () => {
         </div>
       </div>
 
-      {/* Related Products */}
       <RelatedProducts category={productData.category} subCategory={productData.subCategory} />
     </div>
-  ) : (
-    <div className="opacity-0"></div>
   );
 };
 
