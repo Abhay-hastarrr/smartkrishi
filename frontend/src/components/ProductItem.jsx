@@ -1,15 +1,17 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import { ShopContext } from "../context/ShopContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { assets } from "../assets/assets"; // Import assets
+import { assets } from "../assets/assets";
 
 const ProductItem = ({ id, image, name, price }) => {
-  const { currency, products, addToCart, buyNow } = useContext(ShopContext); // Removed buyNow
-  const { t } = useTranslation();
-  const navigate = useNavigate(); // Hook for navigation
+  const { currency, products, addToCart, buyNow } = useContext(ShopContext); 
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
   const [productData, setProductData] = useState(null);
+  const [translatedName, setTranslatedName] = useState(name); // Start with original
+  const [isTranslating, setIsTranslating] = useState(false);
 
   // Fetch product data to check stock
   useEffect(() => {
@@ -19,32 +21,99 @@ const ProductItem = ({ id, image, name, price }) => {
     }
   }, [id, products]);
 
-  // Handle Buy Now (without adding to cart)
+  // MyMemory Translation function (shared logic)
+  const translateText = useCallback(async (text, targetLang) => {
+    if (targetLang === 'en') return text;
+
+    const langCodeMap = {
+      'hi': 'hi-IN',
+      'bn': 'bn-IN',
+      'ta': 'ta-IN',
+      'te': 'te-IN',
+      'mr': 'mr-IN',
+      'gu': 'gu-IN',
+      'pa': 'pa-IN',
+      'awa': 'hi-IN', // fallback
+      'bho': 'hi-IN'  // fallback
+    };
+
+    const targetLangCode = langCodeMap[targetLang] || targetLang;
+
+    try {
+      const response = await fetch(
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en-GB|${targetLangCode}`
+      );
+      
+      const data = await response.json();
+      
+      if (data.responseStatus === 200 && data.responseData?.translatedText) {
+        return data.responseData.translatedText;
+      } else {
+        console.warn('Translation failed for:', text, data);
+        return text;
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+      return text;
+    }
+  }, []);
+
+  // Translate product name
+  const translateProductName = useCallback(async (productName, language) => {
+    if (!productName || language === 'en') {
+      setTranslatedName(productName);
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const translated = await translateText(productName, language);
+      setTranslatedName(translated);
+    } catch (error) {
+      console.error("Failed to translate product name:", error);
+      setTranslatedName(productName); // fallback
+    } finally {
+      setIsTranslating(false);
+    }
+  }, [translateText]);
+
+  // Translate on mount and when language changes
+  useEffect(() => {
+    translateProductName(name, i18n.language);
+  }, [name, i18n.language, translateProductName]);
+
+  // Handle Buy Now
   const handleBuyNow = () => {
     if (productData?.stock > 0) {
-      buyNow(productData._id)    
+      buyNow(productData._id);
+      navigate("/place-order"); // 👈 Don’t forget to navigate after buyNow
     }
   };
 
   return (
     <div className="border rounded-lg shadow-md overflow-hidden bg-white transition duration-300 hover:shadow-lg">
       {/* Product Image */}
-      <Link onClick={() => scrollTo(0, 0)} to={`/product/${id}`}>
+      <Link onClick={() => window.scrollTo(0, 0)} to={`/product/${id}`}>
         <div className="relative overflow-hidden">
           <img
             className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
             src={image[0]}
-            alt={name}
+            alt={translatedName || name}
           />
         </div>
       </Link>
 
       {/* Product Info */}
       <div className="p-4 text-center">
-        <p className="text-sm font-semibold text-gray-800 truncate">{name}</p>
+        <p className="text-sm font-semibold text-gray-800 truncate">
+          {isTranslating ? (
+            <span className="animate-pulse bg-gray-200 rounded inline-block w-3/4 h-4"></span>
+          ) : (
+            translatedName
+          )}
+        </p>
         <p className="text-lg font-bold text-green-600 mt-2">
-          {currency}
-          {price}
+          {currency}{price}
         </p>
 
         {/* Action Buttons or Out of Stock Message */}
@@ -59,7 +128,7 @@ const ProductItem = ({ id, image, name, price }) => {
                 className="bg-green-600 text-white flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition duration-300 hover:bg-gray-600"
               >
                 {hovered ? (
-                  <img src={assets.cart_icon} alt="Cart Icon" className="w-5 h-5 " />
+                  <img src={assets.cart_icon} alt="Cart Icon" className="w-5 h-5" />
                 ) : (
                   t("add_to_cart")
                 )}
@@ -67,7 +136,7 @@ const ProductItem = ({ id, image, name, price }) => {
 
               {/* Buy Now Button */}
               <button
-               onClick={handleBuyNow} // Corrected Buy Now function
+                onClick={handleBuyNow}
                 className="bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium transition duration-300 hover:bg-gray-600"
               >
                 {t("proceed_to_checkout")}

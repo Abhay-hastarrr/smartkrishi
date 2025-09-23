@@ -13,7 +13,78 @@ const Product = () => {
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState("");
   const [weight, setWeight] = useState("");
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  
+  // State for translated content
+  const [translatedName, setTranslatedName] = useState("");
+  const [translatedDescription, setTranslatedDescription] = useState("");
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  // MyMemory Translation function
+  const translateText = async (text, targetLang) => {
+    // If target language is English, return original text
+    if (targetLang === 'en') {
+      return text;
+    }
+
+    // Language code mapping for MyMemory API
+    const langCodeMap = {
+      'hi': 'hi-IN',  // Hindi
+      'bn': 'bn-IN',  // Bengali
+      'ta': 'ta-IN',  // Tamil
+      'te': 'te-IN',  // Telugu
+      'mr': 'mr-IN',  // Marathi
+      'gu': 'gu-IN',  // Gujarati
+      'pa': 'pa-IN',  // Punjabi
+      'awa': 'hi-IN', // Awadhi (using Hindi as fallback)
+      'bho': 'hi-IN'  // Bhojpuri (using Hindi as fallback)
+    };
+
+    const targetLangCode = langCodeMap[targetLang] || targetLang;
+
+    try {
+      const response = await fetch(
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en-GB|${targetLangCode}`
+      );
+      
+      const data = await response.json();
+      
+      if (data.responseStatus === 200 && data.responseData.translatedText) {
+        return data.responseData.translatedText;
+      } else {
+        console.error('Translation failed:', data);
+        return text; // Return original text if translation fails
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+      return text; // Return original text on error
+    }
+  };
+
+  // Function to translate product content
+  const translateProductContent = async (product, language) => {
+    if (!product) return;
+    
+    setIsTranslating(true);
+    
+    try {
+      // Translate name and description in parallel
+      const [translatedNameResult, translatedDescResult] = await Promise.all([
+        translateText(product.name, language),
+        translateText(product.description, language)
+      ]);
+      
+      setTranslatedName(translatedNameResult);
+      setTranslatedDescription(translatedDescResult);
+    } catch (error) {
+      console.error('Error translating product content:', error);
+      // Fallback to original text
+      setTranslatedName(product.name);
+      setTranslatedDescription(product.description);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   // Fetch product data from context
   useEffect(() => {
@@ -22,8 +93,31 @@ const Product = () => {
       setProductData(foundProduct);
       setImage(foundProduct.image[0]);
       setWeight(foundProduct.weight || "N/A");
+      
+      // Set initial translated content
+      setTranslatedName(foundProduct.name);
+      setTranslatedDescription(foundProduct.description);
+      
+      // Translate if not in English
+      if (i18n.language !== 'en') {
+        translateProductContent(foundProduct, i18n.language);
+      }
     }
   }, [productId, products]);
+
+  // Watch for language changes
+  useEffect(() => {
+    if (productData) {
+      if (i18n.language === 'en') {
+        // Reset to original English content
+        setTranslatedName(productData.name);
+        setTranslatedDescription(productData.description);
+      } else {
+        // Translate to selected language
+        translateProductContent(productData, i18n.language);
+      }
+    }
+  }, [i18n.language, productData]);
 
   // Function to update stock in the database
   const updateStock = async (productId, quantitySold) => {
@@ -71,12 +165,12 @@ const Product = () => {
     }
   };
 
-  // Handle Buy Now (without adding to cart)
+  // Handle Buy Now
   const handleBuyNow = async () => {
     if (productData.stock > 0) {
-      buyNow(productData.id);
-      await updateStock(productData._id, 1); // Deduct stock in DB
-      navigate("/place-order"); // Navigate to checkout
+      buyNow(productData._id);
+      await updateStock(productData._id, 1);
+      navigate("/place-order");
     }
   };
 
@@ -105,7 +199,11 @@ const Product = () => {
         {/* Product Details */}
         <div className="flex-1">
           <h1 className="font-medium text-2xl mt-2">
-            {t(`products.${productData._id}.name`, { defaultValue: productData.name })}
+            {isTranslating ? (
+              <span className="animate-pulse bg-gray-200 rounded inline-block w-48 h-8"></span>
+            ) : (
+              translatedName
+            )}
           </h1>
           <div className="flex items-center gap-1 mt-2">
             {/* Rating */}
@@ -122,7 +220,11 @@ const Product = () => {
           </p>
 
           <p className="mt-5 text-gray-500 md:w-4/5">
-            {t(`products.${productData._id}.description`, { defaultValue: productData.description })}
+            {isTranslating ? (
+              <span className="animate-pulse bg-gray-200 rounded inline-block w-full h-20"></span>
+            ) : (
+              translatedDescription
+            )}
           </p>
           <h1 className="mt-5 text-gray-500 md:w-4/5">{weight}</h1>
 
@@ -136,7 +238,7 @@ const Product = () => {
                 {t("add_to_cart")}
               </button>
               <button
-                onClick={()=>buyNow(productData._id)}
+                onClick={handleBuyNow}
                 className="bg-green-500 text-white px-8 py-3 text-sm active:bg-gray-700 hover:scale-105 shadow-lg rounded mx-2"
               >
                 {t("proceed_to_checkout")}
