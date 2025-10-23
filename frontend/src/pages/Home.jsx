@@ -10,6 +10,7 @@ import PlantProtection from '../components/PlantProtection'
 import AnimalHusbandry from '../components/AnimalHusbandry'
 import Plant from '../components/plant'
 import Seedling from '../components/Seedling'
+import GeminiChatbot from '../components/GeminiChatbot'
 
 
 
@@ -31,6 +32,7 @@ const Home = () => {
       <AnimalHusbandry />
       <OurPolicy />
       <NewsletterBox />
+      <GeminiChatbot />
     </div>
   )
 }

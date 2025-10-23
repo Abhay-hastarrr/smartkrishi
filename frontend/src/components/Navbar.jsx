@@ -70,6 +70,12 @@ const Navbar = () => {
                 >
                   {t("orders")}
                 </p>
+                <p
+                  onClick={() => navigate("/help")}
+                  className="cursor-pointer hover:text-black"
+                >
+                  {t("help")}
+                </p>
                 <p onClick={logout} className="cursor-pointer hover:text-black">
                   {t("logout")}
                 </p>

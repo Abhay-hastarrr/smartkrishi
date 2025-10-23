@@ -14,7 +14,8 @@ import PlaceOrder from "./pages/PlaceOrder";
 import Orders from "./pages/Orders";
 import Verify from "./pages/Verify";
 import Information from "./pages/Information";
-import ChatBot from "./components/ChatBot";
+import Help from "./pages/Help";
+import CategorySubcategoryPage from "./pages/CategorySubcategoryPage";
 import VoiceAssistant from './components/VoiceAssistant'
 
 
@@ -40,19 +41,19 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/collection" element={<Collection />} />
         <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/contact" element={<Information/>}/>
+        <Route path="/information" element={<Information />} />
         <Route path="/product/:productId" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<Login />} />
         <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/verify" element={<Verify />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/category/:category/:subcategory" element={<CategorySubcategoryPage />} />
 
       </Routes>
       <Footer />
 
-      <ChatBot />
       <VoiceAssistant />
     </div>
   );

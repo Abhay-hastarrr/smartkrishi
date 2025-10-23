@@ -39,14 +39,25 @@
 
 AgriNext bridges the gap between farmers and buyers by leveraging the latest web technologies for agriculture.
 
-### 🔑 Features
+### 🔑 Core Features
 
-- 🌐 <b>Multilingual Support</b>: English, Hindi, Bhojpuri
-- 🎙️ <b>Voice Navigation & Speech Recognition</b>
-- 🤖 <b>AI Chatbot Assistance</b>
-- 🔐 <b>Secure Transactions & Authentication</b>
-- ⚙️ <b>Modular, Customizable Architecture</b>
-- 📊 <b>Real-Time Admin Panel & Dashboards</b>
+- 🛍️ **E-commerce Platform**: A full-featured online store for agricultural products. Browse, search, and purchase items with ease.
+- 🔐 **Secure User Authentication**: Safe and secure user login and registration system.
+- 🛒 **Shopping Cart**: A persistent shopping cart that remembers your items.
+- 💳 **Payment Integration**: Seamless payment processing with Razorpay and Stripe.
+- 📦 **Order Management**: Track your order status from placement to delivery.
+
+### ✨ Intelligent Features
+
+- 🤖 **AI-Powered Crop Recommendations**: A sophisticated chatbot, powered by the Gemini API, that provides personalized crop suggestions. It takes into account factors like land size, location, soil type, and water availability to help farmers make informed decisions.
+- 🎙️ **Voice Assistant**: Navigate the website and interact with its features using voice commands. Supports both English and Hindi for a hands-free experience.
+- 🌐 **Multilingual Support**: The user interface is available in multiple languages (English, Hindi, Bhojpuri) to cater to a diverse user base.
+
+### ⚙️ Admin Panel
+
+- 📈 **Dashboard**: An intuitive dashboard for managing the entire platform.
+- 🛍️ **Product Management**: Add, edit, and remove products from the store. Update stock levels and manage product details.
+- 📋 **Order Fulfillment**: View and manage all customer orders. Update order statuses to keep customers informed.
 
 ---
 
@@ -58,9 +69,9 @@ AgriNext bridges the gap between farmers and buyers by leveraging the latest web
 | **Backend**     | Express, Node.js, MongoDB                                   |
 | **Languages**   | JavaScript, JSON, Markdown                                  |
 | **Styling**     | TailwindCSS, PostCSS, Autoprefixer                          |
-| **APIs/Libraries** | i18next, Axios, ESLint                                   |
-| **Integrations**| Razorpay (Payments), Cloudinary (Media), OpenAI (AI Chatbot), Stripe (Subscription) |
-| **Utilities**   | Nodemon, Mongoose, .env, npm                                |
+| **APIs/Libraries** | i18next, Axios, ESLint, React Router, Mongoose , MyMemory Translation            |
+| **Integrations**| Stripe (Payments), Cloudinary (Media), Grok API (AI Chatbot) |
+| **Utilities**   | Nodemon, dotenv, npm                                        |
 
 ---
 

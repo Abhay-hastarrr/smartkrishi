@@ -1,6 +1,16 @@
 {
     "welcome": "Welcome to AgriNext",
     "cart": "Your Cart",
-    "language": "Language"
+    "language": "Language",
+    "home": "Home",
+    "collection": "Collection",
+    "about": "About",
+    "contact": "Contact",
+    "orders": "Orders",
+    "logout": "Logout",
+    "login": "Login",
+    "back": "Back",
+    "settings": "Settings",
+    "help": "Help"
   }
   

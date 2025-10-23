@@ -8,7 +8,7 @@ import productRouter from './routes/productRoute.js'
 import cartRouter from './routes/cartRoute.js'
 import orderRouter from './routes/orderRoute.js'
 import voiceRouter from "./routes/voiceRoute.js";
-
+import geminiChatbotRouter from './routes/geminiChatbotRouter.js'
 
 // App Config
 const app = express()
@@ -20,7 +20,7 @@ connectCloudinary()
 
 // middlewares
 app.use(express.json())
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "*" })); 
 
 
 // api endpoints
@@ -29,6 +29,7 @@ app.use('/api/product',productRouter)
 app.use('/api/cart',cartRouter)
 app.use('/api/order',orderRouter)
 app.use("/api/voice", voiceRouter);
+app.use('/api/chatbot', geminiChatbotRouter)
 
 app.get('/',(req,res)=>{
     res.send("API Working")
