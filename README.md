@@ -90,7 +90,7 @@ Make sure you have the following installed:
 
 ```bash
 # 1. Clone the Repository
-git clone https://github.com/Abhay-hastarrr/AgriNext.git
+git clone https://github.com/Abhay-hastarrr/smartkrishi.git
 
 # 2. Navigate to Project Directory
 cd AgriNext
